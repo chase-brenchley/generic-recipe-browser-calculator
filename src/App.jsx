@@ -4,21 +4,39 @@ import { AnimatePresence, motion } from "framer-motion";
 
 function App() {
   const initialItems = [
-    { name: "Item 1", inputs: ["Item 0"] },
-    { name: "Item 2", inputs: ["Item 1"] },
-    { name: "Item 3", inputs: ["Item 2"] },
-    { name: "Item 4", inputs: ["Item 3"] },
-    { name: "Item 5", inputs: ["Item 4"] },
-    { name: "Item 6", inputs: ["Item 5"] },
-    { name: "Item 7", inputs: ["Item 6"] },
-    { name: "Item 8", inputs: ["Item 7"] },
-    { name: "Item 9", inputs: ["Item 8"] },
-    { name: "Item 10", inputs: ["Item 9"] },
-    { name: "Item 11", inputs: ["Item 10"] },
-    { name: "Item 12", inputs: ["Item 11"] },
+    { name: "Wood Log", inputs: [], outputs: ["Wood Plank"] },
+    {
+      name: "Wood Plank",
+      inputs: ["Wood Log"],
+      outputs: ["Wooden Stick", "Wooden Board"],
+    },
+    { name: "Wooden Stick", inputs: ["Wood Plank"], outputs: ["Wooden Sword"] },
+    {
+      name: "Wooden Board",
+      inputs: ["Wood Plank"],
+      outputs: ["Wooden Shield"],
+    },
+    { name: "Stone", inputs: [], outputs: ["Stone Block"] },
+    {
+      name: "Stone Block",
+      inputs: ["Stone"],
+      outputs: ["Stone Bricks", "Stone Slab"],
+    },
+    { name: "Stone Bricks", inputs: ["Stone Block"], outputs: ["Stone Sword"] },
+    { name: "Stone Slab", inputs: ["Stone Block"], outputs: ["Stone Shield"] },
+    { name: "Iron Ingot", inputs: [], outputs: ["Iron Sword"] },
+    { name: "Iron Sword", inputs: ["Iron Ingot"], outputs: ["Iron Shield"] },
+    { name: "Gold Ingot", inputs: [], outputs: ["Golden Sword"] },
+    {
+      name: "Golden Sword",
+      inputs: ["Gold Ingot"],
+      outputs: ["Golden Shield"],
+    },
   ];
 
   const [items, setItems] = useState(initialItems);
+  const [showInsAndOuts, setShowInsAndOuts] = useState(false);
+  const [selectedItem, setSelectedItem] = useState(null);
 
   return (
     <>
@@ -28,7 +46,7 @@ function App() {
       >
         <AnimatePresence initial={false}>
           {items.map((item) => (
-            <motion.button
+            <motion.div
               layout
               initial={{
                 opacity: 0,
@@ -44,12 +62,58 @@ function App() {
                 transition: { duration: 0.1 },
               }}
               onClick={() => {
-                if (items.length > 1) setItems([item]);
-                else setItems(initialItems);
+                if (items.length > 1) {
+                  setItems([item]);
+                  setSelectedItem(item);
+                } else {
+                  setItems(initialItems);
+                  setSelectedItem(null);
+                }
               }}
+              onLayoutAnimationComplete={(def) => {
+                if (selectedItem) {
+                  setShowInsAndOuts(true);
+                }
+              }}
+              onLayoutAnimationStart={(def) => {
+                if (!selectedItem) {
+                  setShowInsAndOuts(false);
+                }
+              }}
+              style={{ display: "flex", alignItems: "center" }}
             >
-              {item.name}
-            </motion.button>
+              {showInsAndOuts && (
+                <motion.div
+                  animate={{ x: -200 }}
+                  style={{
+                    display: "flex",
+                    flexDirection: "column",
+                    gap: "5px",
+                  }}
+                >
+                  {item.inputs.map((input) => (
+                    <button id={input}>{input}</button>
+                  ))}
+                </motion.div>
+              )}
+              <motion.div layout>
+                <motion.button>{item.name}</motion.button>
+              </motion.div>
+              {showInsAndOuts && (
+                <motion.div
+                  animate={{ x: 200 }}
+                  style={{
+                    display: "flex",
+                    flexDirection: "column",
+                    gap: "5px",
+                  }}
+                >
+                  {item.outputs.map((input) => (
+                    <button id={input}>{input}</button>
+                  ))}
+                </motion.div>
+              )}
+            </motion.div>
           ))}
         </AnimatePresence>
       </motion.div>
